@@ -9,7 +9,7 @@ import com.example.moviesapp.domain.entities.MovieModel
 @Dao
 interface MovieDao {
 
-    @Query("SELECT * FROM movie ORDER BY popularity DESC")
+    @Query("SELECT * FROM movie ORDER BY sortOrder ASC")
     fun getAllMovies(): List<MovieModel>
 
     @Query("SELECT * FROM movie WHERE movieId = :movieId")

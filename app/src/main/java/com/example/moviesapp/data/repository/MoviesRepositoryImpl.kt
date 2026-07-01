@@ -16,7 +16,8 @@ class MoviesRepositoryImpl @Inject constructor(
 
     override suspend fun getPopularMovies(): Flow<List<MovieModel>> {
         return flow {
-            val response = service.getPopularMovies().results.map { it.toMovieModel() }
+            val response = service.getPopularMovies().results
+                .mapIndexed { index, dto -> dto.toMovieModel().copy(sortOrder = index) }
             dao.insertAll(response)
             emit(response)
         }

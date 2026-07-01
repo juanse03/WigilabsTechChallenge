@@ -8,7 +8,10 @@ import com.example.moviesapp.MOVIE_TITLE
 import com.example.moviesapp.MOVIE_VOTE_AVERAGE
 import com.example.moviesapp.data.datasource.api.MoviesApi
 import com.example.moviesapp.data.datasource.localsource.MovieDao
+import com.example.moviesapp.data.models.MovieDto
+import com.example.moviesapp.data.models.MoviesApiResponse
 import com.example.moviesapp.data.repository.MoviesRepositoryImpl
+import com.example.moviesapp.domain.entities.MovieModel
 import com.example.moviesapp.generateMockMoviesApiResponse
 import com.example.moviesapp.movieModelList
 import kotlinx.coroutines.flow.first
@@ -18,6 +21,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -52,6 +56,52 @@ class MoviesRepositoryTest {
         assertEquals(data.popularity, MOVIE_POPULARITY, 0.0)
 
         verify(api).getPopularMovies()
+    }
+
+    @Test
+    fun `getPopularMovies preserves API response order via sortOrder instead of re-sorting by popularity`() = runTest {
+        // Regression test: MovieDao.getAllMovies() orders by `sortOrder ASC`, so the network
+        // path must stamp movies with their API response index rather than emitting them
+        // re-sorted by popularity. Otherwise the online list order (raw API order) and the
+        // offline/cached list order (DB ORDER BY) would diverge - the original reported bug.
+        val lowerPopularityButFirst = MovieDto(
+            id = 1,
+            title = "First in API response",
+            overview = MOVIE_OVERVIEW,
+            posterPath = null,
+            backdropPath = null,
+            releaseDate = MOVIE_RELEASE_DATE,
+            voteAverage = MOVIE_VOTE_AVERAGE,
+            popularity = 10.0
+        )
+        val higherPopularityButSecond = MovieDto(
+            id = 2,
+            title = "Second in API response",
+            overview = MOVIE_OVERVIEW,
+            posterPath = null,
+            backdropPath = null,
+            releaseDate = MOVIE_RELEASE_DATE,
+            voteAverage = MOVIE_VOTE_AVERAGE,
+            popularity = 999.0
+        )
+        val apiResponse = MoviesApiResponse(
+            page = 1,
+            results = listOf(lowerPopularityButFirst, higherPopularityButSecond),
+            totalPages = 1,
+            totalResults = 2
+        )
+        whenever(api.getPopularMovies()).thenReturn(apiResponse)
+
+        val data = sut.getPopularMovies().first()
+
+        assertEquals(listOf(1, 2), data.map { it.movieId })
+        assertEquals(0, data[0].sortOrder)
+        assertEquals(1, data[1].sortOrder)
+
+        val captor = argumentCaptor<List<MovieModel>>()
+        verify(dao).insertAll(captor.capture())
+        assertEquals(listOf(1, 2), captor.firstValue.map { it.movieId })
+        assertEquals(listOf(0, 1), captor.firstValue.map { it.sortOrder })
     }
 
     @Test

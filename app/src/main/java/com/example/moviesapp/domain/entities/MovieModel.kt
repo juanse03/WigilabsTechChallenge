@@ -14,4 +14,5 @@ data class MovieModel(
     val releaseDate: String,
     val voteAverage: Double,
     val popularity: Double,
+    val sortOrder: Int = 0,
 )
