@@ -1,0 +1,10 @@
+package com.example.moviesapp.domain.usecases
+
+import com.example.moviesapp.domain.repository.MoviesRepository
+import javax.inject.Inject
+
+class FetchPopularMoviesUseCase @Inject constructor(
+    private val repository: MoviesRepository
+) {
+    suspend operator fun invoke() = repository.getPopularMovies()
+}

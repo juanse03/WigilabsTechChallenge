@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">MoviesApp</string>
+    <string name="popular_movies_title">Popular Movies TMDB</string>
+    <string name="back_content_description">Back</string>
+    <string name="local_database_empty_title">Data is not loaded in local database</string>
+    <string name="local_database_empty_message">We cannot show data without internet connection</string>
+    <string name="try_again">Try again</string>
+    <string name="detail_rating">★ %1$s</string>
+    <string name="detail_release_date"> • %1$s</string>
+    <string name="detail_popularity"> • Popularity: %1$s</string>
+    <string name="offline_showing_saved_movies">No internet connection. Showing saved movies — reconnect to refresh.</string>
+    <string name="local_database_without_data">Local Database without data</string>
+</resources>
