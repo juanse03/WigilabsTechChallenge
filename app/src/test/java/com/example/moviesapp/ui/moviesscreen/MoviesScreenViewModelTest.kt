@@ -48,14 +48,9 @@ class MoviesScreenViewModelTest {
 
     @After
     fun tearDown() {
-        // sut is constructed directly (no ViewModelStore), so nothing else cancels
-        // viewModelScope between tests; without this, a coroutine left in flight by one
-        // test resumes after the next test's CoroutinesTestRule resets Dispatchers.Main.
         sut.viewModelScope.cancel()
     }
 
-    // MoviesRepositoryImpl's Flows run on Dispatchers.IO (a real dispatcher, not virtual
-    // test time), so assertions poll with a bounded timeout instead of asserting immediately.
     private suspend fun awaitState(predicate: () -> Boolean) {
         withTimeout(2000) {
             while (!predicate()) {
@@ -95,8 +90,6 @@ class MoviesScreenViewModelTest {
         )
 
         sut.getMoviesList()
-        // An empty successful fetch should never transition away from ShowLoading; give the
-        // real Dispatchers.IO collection a window to run before asserting nothing changed.
         delay(300)
 
         Assert.assertTrue(
@@ -138,7 +131,6 @@ class MoviesScreenViewModelTest {
         whenever(repository.getPopularMovies()).thenReturn(flow { emit(movieModelList) })
         sut.getMoviesList()
 
-        // getMoviesList() clears movieErrorState synchronously before launching the fetch.
         Assert.assertTrue(sut.movieErrorState.value.isEmpty())
     }
 }

@@ -60,10 +60,6 @@ class MoviesRepositoryTest {
 
     @Test
     fun `getPopularMovies preserves API response order via sortOrder instead of re-sorting by popularity`() = runTest {
-        // Regression test: MovieDao.getAllMovies() orders by `sortOrder ASC`, so the network
-        // path must stamp movies with their API response index rather than emitting them
-        // re-sorted by popularity. Otherwise the online list order (raw API order) and the
-        // offline/cached list order (DB ORDER BY) would diverge - the original reported bug.
         val lowerPopularityButFirst = MovieDto(
             id = 1,
             title = "First in API response",

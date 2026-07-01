@@ -52,8 +52,6 @@ class MovieDetailViewModelTest {
         val savedStateHandle = SavedStateHandle(mapOf("movieId" to MOVIE_ID))
         sut = MovieDetailViewModel(getMovieByIdUseCase, savedStateHandle)
 
-        // MovieDetailViewModel collects on Dispatchers.IO (a real dispatcher), so poll
-        // with a bounded timeout instead of relying on virtual-time test dispatchers.
         withTimeout(2000) {
             while (sut.movie.value == null) {
                 delay(10)
